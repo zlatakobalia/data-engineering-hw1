@@ -1,11 +1,10 @@
 version: 2
 
-# Задание 3. Описания и тесты staging-моделей.
-# Для stg_shop__orders часть тестов уже есть — допишите остальное по образцу.
+# Staging: одна модель на таблицу источника, только переименование, типы и простые флаги.
 
 models:
   - name: stg_shop__orders
-    description: "Заказы из источника: одна строка — один заказ."
+    description: "Заказы из источника: одна строка — один заказ, включая тестовые (их отсекают витрины)."
     columns:
       - name: order_id
         description: "Номер заказа."
@@ -18,6 +17,11 @@ models:
               arguments:
                 to: ref('stg_shop__customers')
                 field: customer_id
+      - name: ordered_at
+        description: "Время оформления заказа (order_created_at в источнике)."
+        data_tests: [not_null]
+      - name: order_date
+        description: "Дата заказа без времени."
       - name: order_status
         description: "Статус заказа. test — тестовые заказы: в источнике они есть, в аналитику не попадают."
         data_tests:
@@ -25,7 +29,10 @@ models:
               arguments:
                 values: ['paid', 'pending', 'returned', 'cancelled', 'test']
       - name: order_amount
-        description: "Сумма заказа в рублях после скидок."
+        description: "Сумма заказа в рублях после скидок (total_amount в источнике)."
+        data_tests: [not_null, non_negative]
+      - name: is_test_order
+        description: "Тестовый заказ: статус test."
 
   - name: stg_shop__customers
     description: "Клиенты из источника: одна строка — один клиент."
@@ -33,8 +40,52 @@ models:
       - name: customer_id
         description: "Номер клиента."
         data_tests: [unique, not_null]
+      - name: registered_at
+        description: "Время регистрации."
       - name: registration_date
         description: "Дата регистрации без времени."
+      - name: city
+        description: "Город клиента."
+      - name: acquisition_channel
+        description: "Канал привлечения: search, email, organic, social, ads, partner."
+
+  - name: stg_shop__products
+    description: "Товары из источника: одна строка — один товар. Категория — название из product_categories."
+    columns:
+      - name: product_id
+        description: "Номер товара."
+        data_tests: [unique, not_null]
+      - name: product_name
+        description: "Название товара."
+      - name: brand
+        description: "Бренд."
+      - name: category_name
+        description: "Категория товара (category в источнике) — название листа или узла дерева категорий."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_shop__product_categories')
+                field: category_name
+
+  - name: stg_shop__product_categories
+    description: "Категории из источника: одна строка — одна категория. Дерево задано ссылкой на родителя."
+    columns:
+      - name: category_id
+        description: "Номер категории."
+        data_tests: [unique, not_null]
+      - name: parent_category_id
+        description: "Родительская категория; пусто у корневой (Electronics, Home)."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_shop__product_categories')
+                field: category_id
+      - name: category_name
+        description: "Название категории, уникально: по нему на категорию ссылаются товары."
+        data_tests: [unique, not_null]
+      - name: is_root_category
+        description: "Корневая категория: родителя нет."
 
   - name: stg_shop__order_items
     description: "Позиции заказов: одна строка — один товар в заказе."
@@ -50,6 +101,20 @@ models:
               arguments:
                 to: ref('stg_shop__orders')
                 field: order_id
+      - name: product_id
+        description: "Товар."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_shop__products')
+                field: product_id
+      - name: quantity
+        description: "Количество единиц товара."
+      - name: unit_price
+        description: "Цена за единицу до скидки."
+      - name: discount_amount
+        description: "Скидка на всю позицию в рублях."
       - name: gross_amount
         description: "Сумма позиции до скидки: количество × цена."
       - name: line_amount
@@ -69,11 +134,15 @@ models:
               arguments:
                 to: ref('stg_shop__orders')
                 field: order_id
+      - name: paid_at
+        description: "Время операции; пусто у операций в ожидании."
       - name: payment_status
         description: "Статус операции."
         data_tests:
           - accepted_values:
               arguments:
                 values: ['success', 'failed', 'pending']
+      - name: amount
+        description: "Сумма операции; у возврата отрицательная."
       - name: is_refund
         description: "Возврат: успешная операция с отрицательной суммой."

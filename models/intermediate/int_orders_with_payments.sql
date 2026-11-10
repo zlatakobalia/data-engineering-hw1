@@ -1,11 +1,24 @@
--- Задание 4. Одна строка — один заказ, к нему пристыкованы итоги по платежам.
--- Сначала сверните платежи до заказа (CTE order_payments), потом присоедините их к заказам.
+-- Одна строка — один заказ, к нему пристыкованы итоги по платежам и по позициям.
+-- Платежи и позиции сначала сворачиваются до заказа, потом присоединяются left join:
+-- соединять до группировки нельзя, заказ с двумя платежами раздвоится.
 with orders as (
     select * from {{ ref('stg_shop__orders') }}
 ),
 
 payments as (
     select * from {{ ref('stg_shop__payments') }}
+),
+
+order_items as (
+    select * from {{ ref('stg_shop__order_items') }}
+),
+
+order_items_summary as (
+    select
+        order_id,
+        count(distinct product_id)  as items_count     -- число разных товаров в заказе
+    from order_items
+    group by order_id
 ),
 
 order_payments as (
@@ -36,6 +49,7 @@ select
     o.order_status,
     o.order_amount,
     o.is_test_order,
+    coalesce(i.items_count, 0)               as items_count,
     coalesce(p.successful_payments_count, 0) as successful_payments_count,   -- 0 вместо null
     coalesce(p.paid_amount, 0)               as paid_amount,
     coalesce(p.refunded_amount, 0)           as refunded_amount,
@@ -50,3 +64,5 @@ select
 from orders as o
 left join order_payments as p
     on p.order_id = o.order_id
+left join order_items_summary as i
+    on i.order_id = o.order_id
