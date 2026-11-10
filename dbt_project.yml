@@ -21,9 +21,6 @@ models:
       +schema: marts
       +materialized: table
 
-# fct_order_items — инкрементальная модель: при обычном запуске она пересобирает заказы
-# за последние N дней от самого позднего заказа в витрине. Переопределить:
-# dbt build --vars '{fct_order_items_lookback_days: 7}'
 vars:
   fct_order_items_lookback_days: 3
 

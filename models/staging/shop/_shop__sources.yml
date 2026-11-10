@@ -6,12 +6,12 @@ sources:
     schema: raw
     tables:
       - name: customers
-        description: "Клиенты. Одна строка — один зарегистрированный клиент."
+        description: "Клиенты. Одна строка - один зарегистрированный клиент."
         columns:
           - name: customer_id
             data_tests: [unique, not_null]
       - name: products
-        description: "Товары. Категория хранится текстом — названием из product_categories."
+        description: "Товары. Категория хранится текстом - названием из product_categories."
         columns:
           - name: product_id
             data_tests: [unique, not_null]
@@ -21,12 +21,12 @@ sources:
           - name: category_id
             data_tests: [unique, not_null]
       - name: orders
-        description: "Заказы. Одна строка — один заказ, total_amount — сумма позиций со скидками."
+        description: "Заказы. Одна строка - один заказ, total_amount - сумма позиций со скидками."
         columns:
           - name: order_id
             data_tests: [unique, not_null]
       - name: order_items
-        description: "Позиции заказов. Ключ — пара (order_id, product_id)."
+        description: "Позиции заказов. Ключ - пара (order_id, product_id)."
       - name: payments
         description: >
           Платёжные операции. У заказа может быть несколько операций: неуспешная попытка,

@@ -1,7 +1,4 @@
 {{ config(distributed_by='order_id') }}
--- Факт заказов: одна строка — один заказ. Тестовые заказы в витрину не попадают.
--- Хранение: distributed by (order_id), как raw.orders, raw.order_items, raw.payments и fct_order_items —
--- соединение fct_orders с fct_order_items по order_id идёт на каждом сегменте локально.
 select
     order_id,
     customer_id,

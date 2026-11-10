@@ -1,5 +1,3 @@
--- Staging категорий: одна строка — одна категория.
--- Дерево задано ссылкой parent_category_id; у корневой категории она пустая.
 with source as (
     select * from {{ source('shop', 'product_categories') }}
 )

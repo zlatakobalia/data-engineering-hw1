@@ -1,10 +1,8 @@
 version: 2
 
-# Staging: одна модель на таблицу источника, только переименование, типы и простые флаги.
-
 models:
   - name: stg_shop__orders
-    description: "Заказы из источника: одна строка — один заказ, включая тестовые (их отсекают витрины)."
+    description: "Заказы из источника: одна строка - один заказ, включая тестовые (их отсекают витрины)."
     columns:
       - name: order_id
         description: "Номер заказа."
@@ -23,7 +21,7 @@ models:
       - name: order_date
         description: "Дата заказа без времени."
       - name: order_status
-        description: "Статус заказа. test — тестовые заказы: в источнике они есть, в аналитику не попадают."
+        description: "Статус заказа. test - тестовые заказы: в источнике они есть, в аналитику не попадают."
         data_tests:
           - accepted_values:
               arguments:
@@ -35,7 +33,7 @@ models:
         description: "Тестовый заказ: статус test."
 
   - name: stg_shop__customers
-    description: "Клиенты из источника: одна строка — один клиент."
+    description: "Клиенты из источника: одна строка - один клиент."
     columns:
       - name: customer_id
         description: "Номер клиента."
@@ -50,7 +48,7 @@ models:
         description: "Канал привлечения: search, email, organic, social, ads, partner."
 
   - name: stg_shop__products
-    description: "Товары из источника: одна строка — один товар. Категория — название из product_categories."
+    description: "Товары из источника: одна строка - один товар. Категория - название из product_categories."
     columns:
       - name: product_id
         description: "Номер товара."
@@ -60,7 +58,7 @@ models:
       - name: brand
         description: "Бренд."
       - name: category_name
-        description: "Категория товара (category в источнике) — название листа или узла дерева категорий."
+        description: "Категория товара (category в источнике) - название листа или узла дерева категорий."
         data_tests:
           - not_null
           - relationships:
@@ -69,7 +67,7 @@ models:
                 field: category_name
 
   - name: stg_shop__product_categories
-    description: "Категории из источника: одна строка — одна категория. Дерево задано ссылкой на родителя."
+    description: "Категории из источника: одна строка - одна категория. Дерево задано ссылкой на родителя."
     columns:
       - name: category_id
         description: "Номер категории."
@@ -88,7 +86,7 @@ models:
         description: "Корневая категория: родителя нет."
 
   - name: stg_shop__order_items
-    description: "Позиции заказов: одна строка — один товар в заказе."
+    description: "Позиции заказов: одна строка - один товар в заказе."
     columns:
       - name: order_item_id
         description: "Ключ позиции вида 101-1: номер заказа и номер товара через дефис."
@@ -121,7 +119,7 @@ models:
         description: "Сумма позиции после скидки."
 
   - name: stg_shop__payments
-    description: "Платёжные операции: одна строка — одна операция. У заказа их может быть несколько."
+    description: "Платёжные операции: одна строка - одна операция. У заказа их может быть несколько."
     columns:
       - name: payment_id
         description: "Номер операции."

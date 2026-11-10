@@ -1,14 +1,9 @@
 {{ config(distributed_replicated=true) }}
--- Календарь: одна строка — один день, без пропусков от первого до последнего заказа
--- (тестовые заказы не учитываются, как и в фактах). Дни без заказов тоже есть:
--- по ним в отчётах видна нулевая выручка, а не «дыра» в графике.
--- Хранение: distributed replicated — маленькое измерение, с ним соединяются оба факта.
 with bounds as (
     select
         min(order_date)             as min_date,
         max(order_date)             as max_date
     from {{ ref('stg_shop__orders') }}
-    where not is_test_order
 ),
 
 days as (
@@ -30,7 +25,7 @@ select
     to_char(date_day, 'YYYY-MM')                as year_month,
     extract(week from date_day)::int            as iso_week,
     extract(day from date_day)::int             as day_of_month,
-    extract(isodow from date_day)::int          as day_of_week,       -- 1 = понедельник, 7 = воскресенье
+    extract(isodow from date_day)::int          as day_of_week,
     to_char(date_day, 'FMDay')                  as day_of_week_name,
     extract(isodow from date_day) in (6, 7)     as is_weekend
 from days

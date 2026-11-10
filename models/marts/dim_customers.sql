@@ -1,7 +1,4 @@
 {{ config(distributed_replicated=true) }}
--- Измерение клиентов: одна строка — один клиент, включая тех, кто ничего не купил.
--- Хранение: distributed replicated — 40 строк, копия на каждом сегменте,
--- JOIN фактов с клиентами идёт без пересылки строк между сегментами.
 with customers as (
     select * from {{ ref('stg_shop__customers') }}
 ),

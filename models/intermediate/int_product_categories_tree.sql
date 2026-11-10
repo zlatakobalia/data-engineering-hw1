@@ -1,12 +1,8 @@
--- Разворачиваем дерево категорий: одна строка — одна категория,
--- к ней пристыкованы родитель, корень (верхний уровень), глубина и полный путь.
--- Рекурсивный CTE не зависит от глубины: четвёртый уровень появится сам, без правки кода.
 with recursive categories as (
     select * from {{ ref('stg_shop__product_categories') }}
 ),
 
 tree as (
-    -- Якорь: корневые категории (Electronics, Home).
     select
         category_id,
         parent_category_id,
@@ -20,7 +16,6 @@ tree as (
 
     union all
 
-    -- Шаг: дети уже найденных категорий наследуют корень, уровень +1, путь дописывается.
     select
         c.category_id,
         c.parent_category_id,

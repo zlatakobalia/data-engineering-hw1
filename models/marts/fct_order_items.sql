@@ -7,15 +7,6 @@
         orientation='column'
     )
 }}
--- Факт позиций заказа: одна строка — один товар в заказе. Позиции тестовых заказов исключены.
---
--- Инкрементальная модель. Первый запуск (и --full-refresh) строит таблицу целиком.
--- Следующие запуски берут только заказы за последние N дней от самого позднего заказа в витрине
--- (var fct_order_items_lookback_days, по умолчанию 3) и перезаписывают их позиции:
--- delete+insert по ключу order_item_id. Какие изменения источника такой запуск пропустит — см. README.
---
--- Хранение: distributed by (order_id), как у fct_orders и сырых таблиц, + колоночная AO-таблица:
--- это самый большой факт, а отчёты читают из него несколько столбцов (product_id, order_date, line_amount).
 with order_items as (
     select * from {{ ref('stg_shop__order_items') }}
 ),
@@ -25,7 +16,8 @@ orders as (
     where not is_test_order
     {% if is_incremental() %}
       and ordered_at >= (
-          select max(ordered_at) - interval '{{ var("fct_order_items_lookback_days", 3) }} days'
+          select coalesce(max(ordered_at), timestamp '1900-01-01')
+                 - interval '{{ var("fct_order_items_lookback_days", 3) }} days'
           from {{ this }}
       )
     {% endif %}
